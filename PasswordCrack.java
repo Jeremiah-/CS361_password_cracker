@@ -113,7 +113,17 @@ public class PasswordCrack {
 			mangledWord = snakeCase(dicWord, false);
 			encryptAndCheck(mangledWord, allInfo);
 
+			// prepend a character (e.g. @string)
+			for (int c = 33; c < 126; ++c) {
+				mangledWord = prependCharacter(dicWord, c);
+				encryptAndCheck(mangledWord, allInfo);
+			}
 
+			// append a character (e.g. string9)
+			for (int c = 33; c < 126; ++c) {
+				mangledWord = appendCharacter(dicWord, c);
+				encryptAndCheck(mangledWord, allInfo);
+			}
 
 			// Remember, in all these methods, we only have to care about the first 8 chars
 			// Make seperate methods for the different mangles?
@@ -184,6 +194,26 @@ public class PasswordCrack {
 		}
 
 		return wrd.toString();
+	}
+
+	// takes in the word to be mangled and the decimal value, c,
+	// of the ASCII character to prepend
+	private static String prependCharacter(String word, int c) {
+		char character = (char)c;
+		StringBuilder mangledWord = new StringBuilder(character);
+		mangledWord.append(word);
+
+		return mangledWord.toString();
+	}
+
+	// takes in the word to be mangled and the decimal value, c,
+	// of the ASCII character to append
+	private static String appendCharacter(String word, int c) {
+		char character = (char)c;
+		StringBuilder mangledWord = new StringBuilder(word);
+		mangledWord.append(character);
+
+		return mangledWord.toString();
 	}
 
 	private static void encryptAndCheck(String word, ArrayList<ArrayList<String>> allInfo) {
