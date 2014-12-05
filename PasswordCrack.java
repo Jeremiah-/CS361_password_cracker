@@ -62,7 +62,7 @@ public class PasswordCrack {
 		// }
 
 
-		// this is where the magic happens ;)
+		// this is where the magic happens ;) ;)
 		while (dicReader.hasNextLine()) {
 
 			// TODO: for method that remove characters, we need to make the size is not too small
@@ -88,8 +88,26 @@ public class PasswordCrack {
 			mangledWord = reflectWord(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
+			// strictly lower case
+			mangledWord = dicWord.toLowerCase();
+			encryptAndCheck(mangledWord, allInfo);
+
+			// strictly upper case
+			mangledWord = dicWord.toUpperCase();
+			encryptAndCheck(mangledWord, allInfo);
+
+			// even indexes upper case
+			mangledWord = snakeCase(dicWord, true);
+			encryptAndCheck(mangledWord, allInfo);
+
+			// odd indexes upper case
+			mangledWord = snakeCase(dicWord, false);
+			encryptAndCheck(mangledWord, allInfo);
+
+
+
 			// Remember, in all these methods, we only have to care about the first 8 chars
-			// Make seperate methods for the different mangels?
+			// Make seperate methods for the different mangles?
 			// another that tries all capitalization combos
 			// appending a character to the beginning or the end
 			// basically what he brought up in assignment page lol
@@ -106,6 +124,19 @@ public class PasswordCrack {
 
 	private static String reverseString(String word) {
 		return new StringBuilder(word).reverse().toString();
+	}
+
+	private static String snakeCase(String word, boolean firstToUpper) {
+		StringBuilder wrd = new StringBuilder(word);
+		int mode = 0;
+		mode = firstToUpper ? 0 : 1;
+		for (int i = mode; i < wrd.length(); i += 2) {
+			if (!((int)wrd.charAt(i) < 91)) {
+				wrd.setCharAt(i, (char)((int)wrd.charAt(i) - 32));
+			}
+		}
+
+		return wrd.toString();
 	}
 
 	private static void encryptAndCheck(String word, ArrayList<ArrayList<String>> allInfo) {
