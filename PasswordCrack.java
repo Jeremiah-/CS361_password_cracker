@@ -73,17 +73,16 @@ public class PasswordCrack {
 			encryptAndCheck(mangledWord, allInfo);
 
 			// checking for a double
-			mangledWord = dicWord + dicWord;
+			mangledWord = duplicate(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
-			// deleting the first letter and deleting the last letter
-			if (dicWord.length() > 1) {
-				mangledWord = dicWord.substring(1, dicWord.length());
-				encryptAndCheck(mangledWord, allInfo);
+			// deleting the first letter
+			mangledWord = deleteFirst(dicWord);
+			encryptAndCheck(mangledWord, allInfo);
 
-				mangledWord = dicWord.substring(0, dicWord.length() - 1);
-				encryptAndCheck(mangledWord, allInfo);
-			}
+			// deleting the last letter
+			mangledWord = deleteLast(dicWord);
+			encryptAndCheck(mangledWord, allInfo);
 
 			mangledWord = reflectWord(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
@@ -120,6 +119,26 @@ public class PasswordCrack {
 		String reversedWord = reverseString(word);
 		return word + reversedWord;
 
+	}
+
+	private static String duplicate(String word) {
+		return word + word;
+	}
+
+	private static String deleteFirst(String word) {
+		if (word.length() > 1) {
+				word = word.substring(1, word.length());
+		}
+
+		return word;
+	}
+
+	private static String deleteLast(String word) {
+		if (word.length() > 1) {
+			word = word.substring(0, word.length() - 1);
+		}
+
+		return word;
 	}
 
 	private static String reverseString(String word) {
