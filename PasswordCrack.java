@@ -3,6 +3,7 @@ import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.lang.StringBuilder;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class PasswordCrack {
 	public static void main(String[] args) {
@@ -49,8 +50,10 @@ public class PasswordCrack {
 		ArrayList<ArrayList<String>> allInfo = new ArrayList<ArrayList<String>>();
 
 		parseInfo(pwLine, allInfo);
+
+
 		// just checking to see if the info is parsing correctly
-		
+
 		// for (ArrayList<String> info : allInfo) {
 		// 	for (String stuff : info) {
 		// 		System.out.print(stuff + " ");
@@ -62,13 +65,27 @@ public class PasswordCrack {
 		// encrypt our guessed password with the salt retrieved,
 		// compare the two encrypted passwords. 
 
-		// step 1 says to just encrypt the word from the dictionary
-
-		// step 2, use 1 mangle
-
-		// step 3, use 2 mangles
+		// this is where the magic happens ;)
+		while (dicReader.hasNextLine()) {
+			String dicWord = dicReader.nextLine();
+			encryptAndCheck(dicWord, allInfo);
+		}
 		
+	}
 
+	private static void encryptAndCheck(String word, ArrayList<ArrayList<String>> allInfo) {
+		// Jcrypt jcrypt = new Jcrypt();
+		for (Iterator<ArrayList<String>> it = allInfo.iterator(); it.hasNext();) {
+			ArrayList<String> info = it.next();
+			String encryptedPW = Jcrypt.crypt(info.get(1), word);
+			if (encryptedPW.equals(info.get(2))) {
+				System.out.println("Password cracked! Account name: " + info.get(0) +
+					"\tEncrypted password: " + info.get(2) + "\tPlaintext password: "
+					+ word);
+
+				it.remove();
+			}
+		}
 
 	}
 
@@ -84,8 +101,12 @@ public class PasswordCrack {
 
 			line = line.substring(colonPosition + 1);
 			
-			// this is the encrypted password
+			// this is the salt
 			colonPosition = line.indexOf(':');
+			temp = line.substring(0, 2);
+			accountInfo.add(temp);
+
+			// this is the whole password
 			temp = line.substring(0, colonPosition);
 			accountInfo.add(temp);
 
