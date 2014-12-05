@@ -64,21 +64,44 @@ public class PasswordCrack {
 
 		// this is where the magic happens ;)
 		while (dicReader.hasNextLine()) {
+
+			// TODO: for method that remove characters, we need to make the size is not too small
 			String dicWord = dicReader.nextLine();
 			encryptAndCheck(dicWord, allInfo);
 
 			String mangledWord = reverseString(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
+			// checking for a double
+			mangledWord = dicWord + dicWord;
+			encryptAndCheck(mangledWord, allInfo);
+
+			// deleting the first letter and deleting the last letter
+			if (dicWord.length() > 1) {
+				mangledWord = dicWord.substring(1, dicWord.length());
+				encryptAndCheck(mangledWord, allInfo);
+
+				mangledWord = dicWord.substring(0, dicWord.length() - 1);
+				encryptAndCheck(mangledWord, allInfo);
+			}
+
+			mangledWord = reflectWord(dicWord);
+			encryptAndCheck(mangledWord, allInfo);
+
 			// Remember, in all these methods, we only have to care about the first 8 chars
 			// Make seperate methods for the different mangels?
-			// One for reverse string
 			// another that tries all capitalization combos
-			// another that deletes one letter from begining or the end
 			// appending a character to the beginning or the end
 			// basically what he brought up in assignment page lol
 		}
 		
+	}
+
+	private static String reflectWord(String word) {
+		StringBuilder manWord = new StringBuilder(word);
+		String reversedWord = reverseString(word);
+		return word + reversedWord;
+
 	}
 
 	private static String reverseString(String word) {
