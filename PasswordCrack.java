@@ -61,16 +61,28 @@ public class PasswordCrack {
 		// 	System.out.println();
 		// }
 
-		// guess a password, get the salt from the encrypted password,
-		// encrypt our guessed password with the salt retrieved,
-		// compare the two encrypted passwords. 
 
 		// this is where the magic happens ;)
 		while (dicReader.hasNextLine()) {
 			String dicWord = dicReader.nextLine();
 			encryptAndCheck(dicWord, allInfo);
+
+			String mangledWord = reverseString(dicWord);
+			encryptAndCheck(mangledWord, allInfo);
+
+			// Remember, in all these methods, we only have to care about the first 8 chars
+			// Make seperate methods for the different mangels?
+			// One for reverse string
+			// another that tries all capitalization combos
+			// another that deletes one letter from begining or the end
+			// appending a character to the beginning or the end
+			// basically what he brought up in assignment page lol
 		}
 		
+	}
+
+	private static String reverseString(String word) {
+		return new StringBuilder(word).reverse().toString();
 	}
 
 	private static void encryptAndCheck(String word, ArrayList<ArrayList<String>> allInfo) {
