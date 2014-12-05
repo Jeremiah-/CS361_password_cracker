@@ -39,6 +39,10 @@ public class PasswordCrack {
 			return;
 		}
 
+		// guess a password, get the salt from the encrypted password,
+		// encrypt our guessed password with the salt retrieved,
+		// compare the two encrypted passwords. 
+
 
 	}
 }
