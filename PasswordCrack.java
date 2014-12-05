@@ -65,10 +65,11 @@ public class PasswordCrack {
 		// this is where the magic happens ;) ;)
 		while (dicReader.hasNextLine()) {
 
-			// TODO: for method that remove characters, we need to make the size is not too small
+			// TODO: for method that remove characters, we need to make sure the size is not too small
 			String dicWord = dicReader.nextLine();
 			encryptAndCheck(dicWord, allInfo);
 
+			// reverse the string
 			String mangledWord = reverseString(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
@@ -84,15 +85,24 @@ public class PasswordCrack {
 			mangledWord = deleteLast(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
+			// reflect the string (e.g. stringgnirts)
 			mangledWord = reflectWord(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
-			// strictly lower case
+			// all to lower case
 			mangledWord = dicWord.toLowerCase();
 			encryptAndCheck(mangledWord, allInfo);
 
-			// strictly upper case
+			// all to upper case
 			mangledWord = dicWord.toUpperCase();
+			encryptAndCheck(mangledWord, allInfo);
+
+			// capitalize the string (e.g. String)
+			mangledWord = capitalize(dicWord);
+			encryptAndCheck(mangledWord, allInfo);
+
+			// ncapitalize the string (e.g. sTRING)
+			mangledWord = ncapitalize(dicWord);
 			encryptAndCheck(mangledWord, allInfo);
 
 			// even indexes upper case
@@ -143,6 +153,24 @@ public class PasswordCrack {
 
 	private static String reverseString(String word) {
 		return new StringBuilder(word).reverse().toString();
+	}
+
+	private static String capitalize(String word) {
+		word.toLowerCase();
+		StringBuilder str = new StringBuilder(word);
+
+		str.setCharAt(0, (char)((int)str.charAt(0) - 32));
+
+		return str.toString();
+	}
+
+	private static String ncapitalize(String word) {
+		word.toUpperCase();
+		StringBuilder str = new StringBuilder(word);
+
+		str.setCharAt(0, (char)((int)str.charAt(0) + 32));
+
+		return str.toString();
 	}
 
 	private static String snakeCase(String word, boolean firstToUpper) {
