@@ -52,86 +52,199 @@ public class PasswordCrack {
 		parseInfo(pwLine, allInfo);
 
 
-		// just checking to see if the info is parsing correctly
+		// this loop checks to see if the user account names or user names are used as passwords
+		// does not check for 2 mangle versions
+		int oldSize = allInfo.size();
+		for (int n = 0; n < allInfo.size(); ++n) {
 
-		// for (ArrayList<String> info : allInfo) {
-		// 	for (String stuff : info) {
-		// 		System.out.print(stuff + " ");
-		// 	}
-		// 	System.out.println();
-		// }
+			if (allInfo.size() < oldSize) {
+				--n;
+			}
+			oldSize = allInfo.size();
 
+			ArrayList<String> userInfo = allInfo.get(n);
+			String accountName = userInfo.get(0);
+			String firstName = userInfo.get(3).split(" ")[0];
+			String lastName = userInfo.get(3).split(" ")[1];
+			String mangledAccN;
+			String mangledFName;
+			String mangledLName;
 
-		// this is where the magic happens ;) ;)
-		while (dicReader.hasNextLine()) {
+			for (int i = 0; i < 12; ++i) {
+				mangledAccN = whichMangle(i, accountName);
+				mangledFName = whichMangle(i, firstName);
+				mangledLName = whichMangle(i, lastName);
 
-			// TODO: for method that remove characters, we need to make sure the size is not too small
-			String dicWord = dicReader.nextLine();
-			encryptAndCheck(dicWord, allInfo);
+				encryptAndCheck(mangledAccN, allInfo);
+				encryptAndCheck(mangledFName, allInfo);
+				encryptAndCheck(mangledLName, allInfo);
 
-			// reverse the string
-			String mangledWord = reverseString(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
+				for (int k = 1; k < 12; ++k) {
+					String twoMangleAcc = whichMangle(k, mangledAccN);
+					String twoMangleFN = whichMangle(k, mangledFName);
+					String twoMangleLN = whichMangle(k, mangledLName);
+					encryptAndCheck(twoMangleAcc, allInfo);
+					encryptAndCheck(twoMangleFN, allInfo);
+					encryptAndCheck(twoMangleLN, allInfo);
+				}
 
-			// checking for a double
-			mangledWord = duplicate(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
+			}
 
-			// deleting the first letter
-			mangledWord = deleteFirst(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// deleting the last letter
-			mangledWord = deleteLast(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// reflect the string (e.g. stringgnirts)
-			mangledWord = reflectWord(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// all to lower case
-			mangledWord = dicWord.toLowerCase();
-			encryptAndCheck(mangledWord, allInfo);
-
-			// all to upper case
-			mangledWord = dicWord.toUpperCase();
-			encryptAndCheck(mangledWord, allInfo);
-
-			// capitalize the string (e.g. String)
-			mangledWord = capitalize(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// ncapitalize the string (e.g. sTRING)
-			mangledWord = ncapitalize(dicWord);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// even indexes upper case
-			mangledWord = snakeCase(dicWord, true);
-			encryptAndCheck(mangledWord, allInfo);
-
-			// odd indexes upper case
-			mangledWord = snakeCase(dicWord, false);
-			encryptAndCheck(mangledWord, allInfo);
-
+			// these next two loops only prepend to the regular dictWord.
 			// prepend a character (e.g. @string)
 			for (int c = 33; c < 126; ++c) {
+				mangledAccN = prependCharacter(accountName, c);
+				mangledFName = prependCharacter(firstName, c);
+				mangledLName = prependCharacter(lastName, c);
+				encryptAndCheck(mangledAccN, allInfo);
+				encryptAndCheck(mangledFName, allInfo);
+				encryptAndCheck(mangledLName, allInfo);
+			}
+
+			// append a character (e.g. string9)
+			for (int c = 33; c < 127; ++c) {
+				mangledAccN = appendCharacter(accountName, c);
+				mangledFName = appendCharacter(firstName, c);
+				mangledLName = appendCharacter(lastName, c);
+				encryptAndCheck(mangledAccN, allInfo);
+				encryptAndCheck(mangledFName, allInfo);
+				encryptAndCheck(mangledLName, allInfo);
+			}
+
+		}
+
+
+		// this loop reads through the dictionary and tries finding 1 and 2 mangles
+		// does not look for 2 mangles with prepending/appending characters (this is done in another loop)
+		while (dicReader.hasNextLine()) {
+
+			String dicWord = dicReader.nextLine();
+			String mangledWord;
+
+			// this checks mangles of two variations without prepending letters
+			for (int i = 0; i < 12; ++i) {
+				mangledWord = whichMangle(i, dicWord);
+				encryptAndCheck(mangledWord, allInfo);
+
+				for (int k = 1; k < 12; ++k) {
+					String twoMangle = whichMangle(k, mangledWord);
+					encryptAndCheck(twoMangle, allInfo);
+				}
+			}
+
+			// these next two loops only prepend to the regular dictWord.
+			// prepend a character (e.g. @string)
+			for (int c = 33; c < 127; ++c) {
 				mangledWord = prependCharacter(dicWord, c);
 				encryptAndCheck(mangledWord, allInfo);
 			}
 
 			// append a character (e.g. string9)
-			for (int c = 33; c < 126; ++c) {
+			for (int c = 33; c < 127; ++c) {
 				mangledWord = appendCharacter(dicWord, c);
 				encryptAndCheck(mangledWord, allInfo);
 			}
-
-			// Remember, in all these methods, we only have to care about the first 8 chars
-			// Make seperate methods for the different mangles?
-			// another that tries all capitalization combos
-			// appending a character to the beginning or the end
-			// basically what he brought up in assignment page lol
 		}
+
+		dicReader.close();
+		try {
+			dicReader = new Scanner(dicFile);
+		} catch (FileNotFoundException e) {
+			System.out.println("Error: tried finding dictionary file and it was not found.");
+			return;
+		}
+
+
+		// this loop goes throgh all combos with appended and prepended chars
+		while (dicReader.hasNext()) {
+			String mangledWord;
+			String mangledPrepend;
+			String mangledAppend;
+			String dicWord = dicReader.nextLine();
+
+			// this loop prepends/appends a letter to a mangled word
+			for (int i = 0; i < 12; ++i) {
+				mangledWord = whichMangle(i, dicWord);
+				for (int c = 33; c < 127; ++c) {
+
+					mangledPrepend = prependCharacter(mangledWord, c);
+					mangledAppend = appendCharacter(mangledWord, c);
+					encryptAndCheck(mangledPrepend, allInfo);
+					encryptAndCheck(mangledAppend, allInfo);
+				}
+			}
+
+			// this loop goes through all the mangles after the original has a letter prepended/appended
+			for (int c = 33; c < 127; ++c) {
+				mangledPrepend = prependCharacter(dicWord, c);
+				mangledAppend = appendCharacter(dicWord, c);
+
+				for (int i = 1; i < 12; ++i) {
+					mangledPrepend = whichMangle(i, mangledPrepend);
+					mangledAppend = whichMangle(i, mangledAppend);
+					encryptAndCheck(mangledPrepend, allInfo);
+					encryptAndCheck(mangledAppend, allInfo);
+				}
+			}
+
+		}
+
+		dicReader.close();
+
 		
+	}
+
+	private static String whichMangle(int mangleID, String word) {
+
+		switch (mangleID) {
+			case 0:
+				break;
+
+			case 1:
+				word = reverseString(word);
+				break;
+
+			case 2:
+				word = duplicate(word);
+				break;
+
+			case 3:
+				word = deleteFirst(word);
+				break;
+
+			case 4:
+				word = deleteLast(word);
+				break;
+
+			case 5:
+				word = reflectWord(word);
+				break;
+
+			case 6:
+				word = word.toLowerCase();
+				break;
+
+			case 7:
+				word = word.toUpperCase();
+				break;
+
+			case 8:
+				word = capitalize(word);
+				break;
+
+			case 9:
+				word = ncapitalize(word);
+				break;
+
+			case 10:
+				word = snakeCase(word, true);
+				break;
+
+			case 11:
+				word = snakeCase(word, false);
+				break;
+		} // end switch
+		return word;
 	}
 
 	private static String reflectWord(String word) {
@@ -166,7 +279,7 @@ public class PasswordCrack {
 	}
 
 	private static String capitalize(String word) {
-		word.toLowerCase();
+		word = word.toLowerCase();
 		StringBuilder str = new StringBuilder(word);
 
 		str.setCharAt(0, (char)((int)str.charAt(0) - 32));
@@ -175,7 +288,7 @@ public class PasswordCrack {
 	}
 
 	private static String ncapitalize(String word) {
-		word.toUpperCase();
+		word = word.toUpperCase();
 		StringBuilder str = new StringBuilder(word);
 
 		str.setCharAt(0, (char)((int)str.charAt(0) + 32));
@@ -200,7 +313,7 @@ public class PasswordCrack {
 	// of the ASCII character to prepend
 	private static String prependCharacter(String word, int c) {
 		char character = (char)c;
-		StringBuilder mangledWord = new StringBuilder(character);
+		StringBuilder mangledWord = new StringBuilder(Character.toString(character));
 		mangledWord.append(word);
 
 		return mangledWord.toString();
